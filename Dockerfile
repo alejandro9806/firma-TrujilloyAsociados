@@ -1,13 +1,21 @@
-FROM ubuntu:20.04
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    libreoffice \
-    libreoffice-java-common \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.12-slim
+
 WORKDIR /app
+
 COPY . /app
+
+# Instalar dependencias del sistema necesarias para lxml y python-docx
+RUN apt-get update && apt-get install -y \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Actualizar pip y instalar dependencias de Python
+RUN python3 -m pip install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
+
 EXPOSE 5000
+
 CMD ["python3", "app.py"]
