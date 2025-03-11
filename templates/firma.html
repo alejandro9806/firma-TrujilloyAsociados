@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firmar Contrato</title>
     <style>
+        /* Mantén el CSS existente y agrega lo siguiente */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -261,6 +262,22 @@
             z-index: 1000;
             max-width: 80%;
         }
+        
+        .upload-section {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .upload-section input[type="file"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .upload-section button {
+            width: auto;
+            padding: 5px 15px;
+        }
     </style>
 </head>
 <body>
@@ -269,7 +286,7 @@
             <h2>Trujillo y Asociados Law Group</h2>
         </div>
         <h1>Firmar Contrato para {{ mandantes|join(' y ') }}</h1>
-        <form id="firmaForm" method="POST">
+        <form id="firmaForm" method="POST" enctype="multipart/form-data">
             {% for mandante in mandantes %}
                 <input type="hidden" name="mandantes[]" value="{{ mandante }}">
             {% endfor %}
@@ -315,6 +332,11 @@
                         {% endfor %}
                     </select>
                     <div id="mandanteActual">Firma de: Ningún mandante seleccionado</div>
+                    <!-- Nueva sección para subir firma -->
+                    <div class="upload-section">
+                        <input type="file" id="firmaUpload" accept="image/png, image/jpeg" onchange="cargarFirmaSubida()">
+                        <button type="button" id="subirFirmaBtn" onclick="subirFirma()" disabled>Subir Firma</button>
+                    </div>
                 </div>
                 <div class="right-column">
                     <button type="button" id="confirmarBtn" onclick="confirmarFirma()" disabled>Confirmar Firma</button>
@@ -577,12 +599,14 @@
             const borrarBtn = document.getElementById("borrarBtn");
             const confirmarBtn = document.getElementById("confirmarBtn");
             const enviarBtn = document.getElementById("enviarBtn");
+            const subirFirmaBtn = document.getElementById("subirFirmaBtn");
             const totalMandantes = document.getElementById("mandanteSelect").options.length - 1;
 
             fullscreenBtn.disabled = !mandanteActual;
             eraserBtn.disabled = !mandanteActual;
             borrarBtn.disabled = !hayDibujo && !firmas[mandanteActual];
             confirmarBtn.disabled = !hayDibujo;
+            subirFirmaBtn.disabled = !mandanteActual || !document.getElementById("firmaUpload").files.length;
             enviarBtn.disabled = Object.keys(firmas).length !== totalMandantes;
 
             if (Object.keys(firmas).length === totalMandantes) {
@@ -592,7 +616,7 @@
 
         function confirmarFirma() {
             if (!mandanteActual || !hayDibujo) {
-                alert("Debes seleccionar un mandante y dibujar una firma.");
+                alert("Debes seleccionar un mandante y dibujar o subir una firma.");
                 return;
             }
             const firmaData = canvas.toDataURL("image/png");
@@ -615,6 +639,7 @@
                     alert(`Firma confirmada y guardada para ${mandanteActual.replace('_', ' ')}.`);
                     hayDibujo = false;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    document.getElementById("firmaUpload").value = ""; // Limpiar el input de archivo
 
                     const totalMandantes = document.getElementById("mandanteSelect").options.length - 1;
                     if (Object.keys(firmas).length === totalMandantes) {
@@ -665,6 +690,51 @@
                 mensajeFlotante.style.display = "none";
                 alert("Error al enviar las firmas.");
             });
+        }
+
+        // Nuevas funciones para manejar la subida de firmas
+        function cargarFirmaSubida() {
+            const fileInput = document.getElementById("firmaUpload");
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (!mandanteActual) {
+                alert("Por favor selecciona un mandante antes de subir una firma.");
+                fileInput.value = "";
+                return;
+            }
+
+            const validTypes = ["image/png", "image/jpeg"];
+            if (!validTypes.includes(file.type)) {
+                alert("Por favor sube una imagen en formato PNG o JPG.");
+                fileInput.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const dpr = window.devicePixelRatio || 1;
+                    const canvasWidth = canvas.width / dpr;
+                    const canvasHeight = canvas.height / dpr;
+                    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+                    hayDibujo = true;
+                    saveCanvasState();
+                    actualizarBotones();
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function subirFirma() {
+            if (!mandanteActual || !hayDibujo) {
+                alert("Debes seleccionar un mandante y tener una firma cargada.");
+                return;
+            }
+            confirmarFirma(); // Reutilizamos la función de confirmar para guardar la firma subida
         }
     </script>
 </body>
