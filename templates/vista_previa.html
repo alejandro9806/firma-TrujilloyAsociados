@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa del Contrato</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #toolbar {
+            width: 100%;
+            background: #007bff;
+            padding: 10px;
+            text-align: center;
+        }
+        #toolbar button {
+            background: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #pdf-container {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pdf-container">
+        <iframe id="pdf-frame" src="{{ pdf_url }}" frameborder="0"></iframe>
+    </div>
+
+    <script>
+        function abrirEnNuevaPestana() {
+            window.open("{{ pdf_url }}", "_blank");
+        }
+    </script>
+
+</body>
+</html>

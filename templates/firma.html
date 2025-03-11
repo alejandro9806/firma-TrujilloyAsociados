@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firmar Contrato</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 2px solid #2980b9;
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .left-column {
+            flex: 1;
+        }
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        select {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 5px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #1a5276;
+        }
+        .canvas-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .canvas-wrapper {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            border: 1px solid black;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4 / 1;
+            max-height: 300px;
+            background-color: #fff;
+            display: block;
+        }
+        .canvas-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 5px;
+            background: #f4f4f4;
+            border-radius: 5px;
+            flex-shrink: 0;
+            height: auto;
+        }
+        .canvas-controls button {
+            width: auto;
+            height: 50px;
+            font-size: 16px;
+            padding: 0 15px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .canvas-controls button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .canvas-controls button:hover:not(:disabled) {
+            background-color: #1a5276;
+        }
+        .eraser-active {
+            background-color: #e74c3c;
+        }
+        #mandanteActual {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+            color: #34495e;
+        }
+        label[for="mandanteSelect"] {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+            background-color: #e9f1f6;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        :fullscreen .canvas-section {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        :fullscreen .canvas-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        :fullscreen canvas {
+            width: 100vw;
+            height: calc(100vh - 60px);
+            max-height: none;
+            max-width: none;
+            aspect-ratio: 4 / 1;
+        }
+        :fullscreen .canvas-controls {
+            width: 100%;
+            height: auto;
+            gap: 10px;
+            padding: 5px;
+        }
+        :-webkit-full-screen .canvas-section {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        :-webkit-full-screen .canvas-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        :-webkit-full-screen canvas {
+            width: 100vw;
+            height: calc(100vh - 60px);
+            max-height: none;
+            max-width: none;
+            aspect-ratio: 4 / 1;
+        }
+        :-webkit-full-screen .canvas-controls {
+            width: 100%;
+            height: auto;
+            padding: 5px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .top-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .left-column, .right-column {
+                flex: none;
+                width: 100%;
+            }
+            .right-column {
+                align-items: stretch;
+            }
+            canvas {
+                max-height: 400px;
+                aspect-ratio: 2 / 1;
+            }
+            .canvas-controls {
+                gap: 5px;
+                flex-wrap: wrap;
+                padding: 5px;
+            }
+            .canvas-controls button {
+                padding: 0 10px;
+                font-size: 14px;
+                height: 40px;
+                min-width: 80px;
+            }
+        }
+        @media (max-width: 600px) and (orientation: portrait) {
+            :fullscreen .canvas-controls {
+                gap: 5px;
+            }
+            :fullscreen .canvas-controls button {
+                height: 40px;
+                font-size: 14px;
+                min-width: 70px;
+            }
+        }
+        #mensajeFlotante {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #2980b9;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            color: #2c3e50;
+            font-size: 18px;
+            text-align: center;
+            z-index: 1000;
+            max-width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Trujillo y Asociados Law Group</h2>
+        </div>
+        <h1>Firmar Contrato para {{ mandantes|join(' y ') }}</h1>
+        <form id="firmaForm" method="POST">
+            {% for mandante in mandantes %}
+                <input type="hidden" name="mandantes[]" value="{{ mandante }}">
+            {% endfor %}
+            {% if cedulas %}
+                {% for cedula in cedulas %}
+                    <input type="hidden" name="cedulas[]" value="{{ cedula }}">
+                {% endfor %}
+            {% endif %}
+            {% if tipo_identificacion_mandantes %}
+                {% for tipo in tipo_identificacion_mandantes %}
+                    <input type="hidden" name="tipo_identificacion_mandantes[]" value="{{ tipo }}">
+                {% endfor %}
+            {% endif %}
+            {% if demandados %}
+                {% for demandado in demandados %}
+                    <input type="hidden" name="demandados[]" value="{{ demandado }}">
+                {% endfor %}
+            {% endif %}
+            {% if nit_cc_demandados %}
+                {% for nit_cc in nit_cc_demandados %}
+                    <input type="hidden" name="nit_cc_demandados[]" value="{{ nit_cc }}">
+                {% endfor %}
+            {% endif %}
+            {% if tipo_identificacion_demandados %}
+                {% for tipo in tipo_identificacion_demandados %}
+                    <input type="hidden" name="tipo_identificacion_demandados[]" value="{{ tipo }}">
+                {% endfor %}
+            {% endif %}
+            <input type="hidden" name="numero_contrato" value="{{ numero_contrato|default(nombre_archivo) }}">
+            <input type="hidden" name="monto" value="{{ monto|default('0') }}">
+            <input type="hidden" name="monto_letras" value="{{ monto_letras|default('') }}">
+            <input type="hidden" name="pago_final" value="{{ pago_final|default('No') }}">
+            <input type="hidden" name="porcentaje" value="{{ porcentaje|default('') }}">
+            <input type="hidden" name="email" value="{{ email|default('') }}">
+
+            <div class="top-section">
+                <div class="left-column">
+                    <label for="mandanteSelect">Selecciona un mandante:</label>
+                    <select id="mandanteSelect" onchange="cambiarMandante(this.value)">
+                        <option value="">Selecciona un mandante</option>
+                        {% for mandante in mandantes %}
+                            <option value="{{ mandante }}">{{ mandante }}</option>
+                        {% endfor %}
+                    </select>
+                    <div id="mandanteActual">Firma de: Ningún mandante seleccionado</div>
+                </div>
+                <div class="right-column">
+                    <button type="button" id="confirmarBtn" onclick="confirmarFirma()" disabled>Confirmar Firma</button>
+                    <button type="button" id="enviarBtn" onclick="enviarFirmas()" disabled>Firmar Contrato</button>
+                </div>
+            </div>
+            <div class="canvas-section">
+                <div class="canvas-wrapper">
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div class="canvas-controls">
+                    <button type="button" id="fullscreenBtn" onclick="toggleFullScreen()" title="Pantalla Completa">Pantalla Completa</button>
+                    <button type="button" id="borrarBtn" onclick="borrarFirma()" disabled title="Borrar">Borrar</button>
+                    <button type="button" id="eraserBtn" onclick="toggleEraser()" title="Borrador">Borrador</button>
+                </div>
+            </div>
+        </form>
+        <div id="mensajeFlotante"></div>
+    </div>
+
+    <script>
+        const firmasExistentes = {{ firmas_existentes|safe }};
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let firmando = false;
+        let hayDibujo = false;
+        let mandanteActual = null;
+
+        let firmas = {};
+        const mandanteSelect = document.getElementById("mandanteSelect");
+        const mandanteOptions = Array.from(mandanteSelect.options).map(opt => opt.value).filter(v => v !== "");
+        if (firmasExistentes) {
+            mandanteOptions.forEach(mandante => {
+                if (firmasExistentes[mandante]) firmas[mandante] = firmasExistentes[mandante];
+            });
+        }
+        let isErasing = false;
+        let canvasData = null;
+
+        function ajustarCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#000000";
+            redrawCanvas();
+        }
+
+        function ajustarCanvasFullScreen() {
+            if (document.fullscreenElement) {
+                const dpr = window.devicePixelRatio || 1;
+                const buttonHeight = 60;
+                const aspectRatio = 4 / 1;
+
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight - buttonHeight;
+
+                let newWidth = screenWidth * dpr;
+                let newHeight = newWidth / aspectRatio;
+
+                if (newHeight > screenHeight * dpr) {
+                    newHeight = screenHeight * dpr;
+                    newWidth = newHeight * aspectRatio;
+                }
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+
+                ctx.scale(dpr, dpr);
+                ctx.lineWidth = 3;
+                ctx.lineCap = "round";
+                ctx.strokeStyle = "#000000";
+                redrawCanvas();
+            }
+        }
+
+        function obtenerPosicion(event) {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            let x, y;
+            if (event.touches) {
+                const touch = event.touches[0];
+                x = (touch.clientX - rect.left) * (canvas.width / rect.width) / dpr;
+                y = (touch.clientY - rect.top) * (canvas.height / rect.height) / dpr;
+            } else {
+                x = (event.clientX - rect.left) * (canvas.width / rect.width) / dpr;
+                y = (event.clientY - rect.top) * (canvas.height / rect.height) / dpr;
+            }
+            return { x, y };
+        }
+
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (mandanteActual && firmas[mandanteActual]) {
+                let img = new Image();
+                img.src = firmas[mandanteActual];
+                img.onload = () => {
+                    const dpr = window.devicePixelRatio || 1;
+                    const canvasWidth = canvas.width / dpr;
+                    const canvasHeight = canvas.height / dpr;
+                    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+                };
+            } else if (canvasData) {
+                let img = new Image();
+                img.src = canvasData;
+                img.onload = () => {
+                    const dpr = window.devicePixelRatio || 1;
+                    const canvasWidth = canvas.width / dpr;
+                    const canvasHeight = canvas.height / dpr;
+                    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+                };
+            }
+        }
+
+        window.addEventListener("load", ajustarCanvas);
+        window.addEventListener("resize", () => {
+            if (document.fullscreenElement) {
+                ajustarCanvasFullScreen();
+            } else {
+                ajustarCanvas();
+            }
+        });
+        window.addEventListener("orientationchange", () => {
+            if (document.fullscreenElement) {
+                setTimeout(ajustarCanvasFullScreen, 100);
+            }
+        });
+        document.addEventListener("fullscreenchange", () => {
+            if (document.fullscreenElement) {
+                ajustarCanvasFullScreen();
+            } else {
+                ajustarCanvas();
+            }
+        });
+
+        canvas.addEventListener("mousedown", (event) => {
+            if (!mandanteActual) return;
+            firmando = true;
+            hayDibujo = true;
+            const { x, y } = obtenerPosicion(event);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            setupDrawingMode();
+            actualizarBotones();
+        });
+
+        canvas.addEventListener("mousemove", (event) => {
+            if (!firmando) return;
+            const { x, y } = obtenerPosicion(event);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener("mouseup", () => {
+            firmando = false;
+            saveCanvasState();
+        });
+
+        canvas.addEventListener("touchstart", (event) => {
+            if (!mandanteActual) return;
+            firmando = true;
+            hayDibujo = true;
+            const { x, y } = obtenerPosicion(event);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            setupDrawingMode();
+            actualizarBotones();
+            event.preventDefault();
+        });
+
+        canvas.addEventListener("touchmove", (event) => {
+            if (!firmando) return;
+            const { x, y } = obtenerPosicion(event);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            event.preventDefault();
+        });
+
+        canvas.addEventListener("touchend", () => {
+            firmando = false;
+            saveCanvasState();
+        });
+
+        function setupDrawingMode() {
+            if (isErasing) {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.lineWidth = 15;
+            } else {
+                ctx.globalCompositeOperation = "source-over";
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#000000";
+            }
+        }
+
+        function saveCanvasState() {
+            canvasData = canvas.toDataURL("image/png");
+        }
+
+        function toggleEraser() {
+            isErasing = !isErasing;
+            const eraserBtn = document.getElementById("eraserBtn");
+            eraserBtn.classList.toggle("eraser-active");
+            setupDrawingMode();
+        }
+
+        function toggleFullScreen() {
+            const section = document.querySelector(".canvas-section");
+            if (!document.fullscreenElement) {
+                saveCanvasState();
+                section.requestFullscreen().then(() => {
+                    ajustarCanvasFullScreen();
+                }).catch(err => {
+                    console.error("Error al entrar en pantalla completa:", err);
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    ajustarCanvas();
+                }).catch(err => {
+                    console.error("Error al salir de pantalla completa:", err);
+                });
+            }
+        }
+
+        function cambiarMandante(mandante) {
+            if (mandanteActual && hayDibujo && !firmas[mandanteActual]) {
+                alert("Por favor confirma o borra la firma actual antes de cambiar de mandante.");
+                document.getElementById("mandanteSelect").value = mandanteActual;
+                return;
+            }
+            mandanteActual = mandante;
+            hayDibujo = false;
+            isErasing = false;
+            canvasData = null;
+            document.getElementById("eraserBtn").classList.remove("eraser-active");
+            redrawCanvas();
+            document.getElementById("mandanteActual").textContent = 
+                mandante ? `Firma de: ${mandante.replace('_', ' ')}` : "Firma de: Ningún mandante seleccionado";
+            actualizarBotones();
+        }
+
+        function borrarFirma() {
+            if (!mandanteActual) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hayDibujo = false;
+            canvasData = null;
+            if (firmas[mandanteActual]) {
+                delete firmas[mandanteActual];
+            }
+            isErasing = false;
+            document.getElementById("eraserBtn").classList.remove("eraser-active");
+            actualizarBotones();
+        }
+
+        function actualizarBotones() {
+            const fullscreenBtn = document.getElementById("fullscreenBtn");
+            const eraserBtn = document.getElementById("eraserBtn");
+            const borrarBtn = document.getElementById("borrarBtn");
+            const confirmarBtn = document.getElementById("confirmarBtn");
+            const enviarBtn = document.getElementById("enviarBtn");
+            const totalMandantes = document.getElementById("mandanteSelect").options.length - 1;
+
+            fullscreenBtn.disabled = !mandanteActual;
+            eraserBtn.disabled = !mandanteActual;
+            borrarBtn.disabled = !hayDibujo && !firmas[mandanteActual];
+            confirmarBtn.disabled = !hayDibujo;
+            enviarBtn.disabled = Object.keys(firmas).length !== totalMandantes;
+
+            if (Object.keys(firmas).length === totalMandantes) {
+                document.getElementById("mandanteActual").textContent = "Todas las firmas han sido confirmadas. Puedes enviarlas.";
+            }
+        }
+
+        function confirmarFirma() {
+            if (!mandanteActual || !hayDibujo) {
+                alert("Debes seleccionar un mandante y dibujar una firma.");
+                return;
+            }
+            const firmaData = canvas.toDataURL("image/png");
+            firmas[mandanteActual] = firmaData;
+            canvasData = null;
+
+            const formData = new FormData();
+            formData.append("mandante", mandanteActual);
+            formData.append("firma_data", firmaData);
+
+            fetch(`/guardar_firma_temporal/{{ nombre_archivo }}`, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.mensaje.includes("Error")) {
+                    alert(data.mensaje);
+                } else {
+                    alert(`Firma confirmada y guardada para ${mandanteActual.replace('_', ' ')}.`);
+                    hayDibujo = false;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    const totalMandantes = document.getElementById("mandanteSelect").options.length - 1;
+                    if (Object.keys(firmas).length === totalMandantes) {
+                        document.getElementById("mandanteActual").textContent = "Todas las firmas han sido confirmadas. Puedes enviarlas.";
+                    } else {
+                        document.getElementById("mandanteSelect").value = "";
+                        mandanteActual = null;
+                        isErasing = false;
+                        document.getElementById("eraserBtn").classList.remove("eraser-active");
+                        document.getElementById("mandanteActual").textContent = "Firma de: Ningún mandante seleccionado";
+                    }
+                    actualizarBotones();
+                }
+            })
+            .catch(error => {
+                console.error("Error al guardar la firma:", error);
+                alert("Error al guardar la firma en el servidor.");
+            });
+        }
+
+        function enviarFirmas() {
+            const totalMandantes = document.getElementById("mandanteSelect").options.length - 1;
+            if (Object.keys(firmas).length !== totalMandantes) {
+                alert("Faltan firmas de algunos mandantes.");
+                return;
+            }
+
+            const emailCliente = document.querySelector('input[name="email"]').value || "desconocido";
+            const mensajeFlotante = document.getElementById("mensajeFlotante");
+            mensajeFlotante.textContent = `Firmando y enviando contrato al correo "${emailCliente}". Espera un momento..`;
+            mensajeFlotante.style.display = "block";
+
+            let formData = new FormData(document.getElementById("firmaForm"));
+            Object.values(firmas).forEach(firma => formData.append("firma_data[]", firma));
+
+            fetch(`/firma/{{ nombre_archivo }}`, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                mensajeFlotante.style.display = "none";
+                alert(data.mensaje);
+                window.location.href = data.redirect;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                mensajeFlotante.style.display = "none";
+                alert("Error al enviar las firmas.");
+            });
+        }
+    </script>
+</body>
+</html>

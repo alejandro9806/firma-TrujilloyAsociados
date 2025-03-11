@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Contrato</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #1a5276;
+        }
+        .mandante, .demandado {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .mandante button, .demandado button {
+            background: red;
+            color: white;
+            width: auto;
+            padding: 5px 10px;
+            border-radius: 50%;
+        }
+        .mandante button:hover, .demandado button:hover {
+            background: darkred;
+        }
+    </style>
+</head>
+<body>
+    <header>Trujillo y Asociados Law Group</header>
+    <h2>Ingrese los datos para generar el contrato</h2>
+
+    {% if success_message %}
+        <p style="color: green;">{{ success_message }}</p>
+    {% endif %}
+
+    <form method="POST">
+
+        <label for="numero_contrato">Número de Contrato:</label>
+        <input type="text" name="numero_contrato" id="numero_contrato" required>
+
+        <label>Mandantes:</label>
+        <div id="mandantes-container">
+            <div class="mandante">
+                <input type="text" name="mandantes[]" placeholder="Nombre del Mandante" required oninput="this.value = this.value.toUpperCase()" style="font-weight: bold;">
+                <select name="tipo_identificacion_mandantes[]" class="tipo-identificacion">
+                    <option value="C.C.">CC - Cédula de ciudadanía</option>
+                    <option value="NIT">NIT - Número de identificación tributaria</option>
+                    <option value="PEP">PEP - Permiso especial de permanencia</option>
+                    <option value="PA">PA - Pasaporte</option>
+                    <option value="CE">CE - Cédula de extranjería</option>
+                    <option value="TE">TE - Tarjeta de extranjería</option>
+                </select>
+                <input type="text" name="cedulas[]" placeholder="Número de identificación" required oninput="formatearNumero(this)" style="font-weight: bold;">
+                <button type="button" onclick="eliminarMandante(this)">✖</button>
+            </div>
+        </div>
+        <button type="button" onclick="agregarMandante()">+ Agregar Mandante</button>
+
+        <label>Demandados:</label>
+        <div id="demandados-container">
+            <div class="demandado">
+                <input type="text" name="demandados[]" placeholder="Nombre del Demandado" required oninput="this.value = this.value.toUpperCase()" style="font-weight: bold;">
+                <select name="tipo_identificacion_demandados[]" class="tipo-identificacion">
+                    <option value="C.C.">CC - Cédula de ciudadanía</option>
+                    <option value="NIT">NIT - Número de identificación tributaria</option>
+                    <option value="PEP">PEP - Permiso especial de permanencia</option>
+                    <option value="PA">PA - Pasaporte</option>
+                    <option value="CE">CE - Cédula de extranjería</option>
+                    <option value="TE">TE - Tarjeta de extranjería</option>
+                </select>
+                <input type="text" name="nit_cc_demandados[]" placeholder="Número de identificación" required oninput="formatearNumero(this)" style="font-weight: bold;">
+                <button type="button" onclick="eliminarDemandado(this)">✖</button>
+            </div>
+        </div>
+        <button type="button" onclick="agregarDemandado()">+ Agregar Demandado</button>
+
+        <label for="monto">Monto:</label>
+        <input type="text" name="monto" id="monto" required oninput="formatearMonto()" onblur="convertirMonto()">
+
+        <label for="monto_letras">Monto en Letras:</label>
+        <input type="text" name="monto_letras" id="monto_letras" readonly>
+
+        <label for="porcentaje">Porcentaje:</label>
+        <input type="number" name="porcentaje" id="porcentaje"  >
+
+        <label for="pago_final">Pago Final:</label>
+        <select name="pago_final" id="pago_final">
+            <option value="Si">Sí</option>
+            <option value="No">No</option>
+        </select>
+
+        <label for="email">Correo Electrónico:</label>
+        <input type="email" name="email" id="email" required>
+
+        <button type="submit">Generar Contrato</button>
+        <button type="button" onclick="vistaPrevia()">Vista Previa</button>
+
+        <!-- Cambiar el botón de Vista Previa -->
+        <button type="button" onclick="vistaPreviaYFirmar()">Vista Previa y Firmar</button>
+    </form>
+
+    <script>
+
+        function vistaPreviaYFirmar() {
+            let form = document.querySelector("form");
+            let formData = new FormData(form);
+            let params = new URLSearchParams(formData).toString();
+            
+            // Redirigir directamente a la nueva ruta
+            window.location.href = `/vista_previa_y_firmar?${params}`;
+        }
+        
+        function formatearMonto() {
+            let montoInput = document.getElementById("monto");
+            let valor = montoInput.value.replace(/\./g, '');
+            if (isNaN(valor) || valor === "") {
+                montoInput.value = "";
+                return;
+            }
+            let valorFormateado = parseInt(valor, 10).toLocaleString('es-CO');
+            montoInput.value = valorFormateado;
+        }
+        
+        function convertirMonto() {
+            let montoInput = document.getElementById("monto");
+            let valorSinPuntos = montoInput.value.replace(/\./g, '');
+            fetch(`/convertir_monto?valor=${valorSinPuntos}`)
+                .then(response => response.text())
+                .then(data => document.getElementById("monto_letras").value = data)
+                .catch(error => console.error("Error en la conversión:", error));
+        }
+        
+        function formatearNumero(input) {
+            let valor = input.value;
+            valor = valor.replace(/[^\d-]/g, '');
+            let partes = valor.split('-');
+            if (partes.length > 2) {
+                partes = [partes[0], partes.slice(1).join('')];
+            }
+            let partesFormateadas = partes.map(parte => {
+                if (parte === "") return "";
+                return new Intl.NumberFormat('es-CO').format(parseInt(parte, 10));
+            });
+            input.value = partesFormateadas.join(partes.length > 1 ? '-' : '');
+        }
+        
+        function agregarMandante() {
+            let container = document.getElementById("mandantes-container");
+            let nuevoCampo = document.createElement("div");
+            nuevoCampo.classList.add("mandante");
+            nuevoCampo.innerHTML = `
+            <input type="text" name="mandantes[]" placeholder="Nombre del Mandante" required oninput="this.value = this.value.toUpperCase()" style="font-weight: bold;">
+            <select name="tipo_identificacion_mandantes[]" class="tipo-identificacion">
+                <option value="C.C.">CC - Cédula de ciudadanía</option>
+                <option value="NIT">NIT - Número de identificación tributaria</option>
+                <option value="PEP">PEP - Permiso especial de permanencia</option>
+                <option value="PA">PA - Pasaporte</option>
+                <option value="CE">CE - Cédula de extranjería</option>
+                <option value="TE">TE - Tarjeta de extranjería</option>
+            </select>
+            <input type="text" name="cedulas[]" placeholder="Número de identificación" required oninput="formatearNumero(this)" style="font-weight: bold;">
+                <button type="button" onclick="eliminarMandante(this)">✖</button>
+            `;
+            container.appendChild(nuevoCampo);
+        }
+        
+        function eliminarMandante(btn) {
+            btn.parentElement.remove();
+        }
+        
+        function agregarDemandado() {
+            let container = document.getElementById("demandados-container");
+            let nuevoCampo = document.createElement("div");
+            nuevoCampo.classList.add("demandado");
+            nuevoCampo.innerHTML = `
+            <input type="text" name="demandados[]" placeholder="Nombre del Demandado" required oninput="this.value = this.value.toUpperCase()" style="font-weight: bold;">
+            <select name="tipo_identificacion_demandados[]" class="tipo-identificacion">
+                <option value="C.C.">CC - Cédula de ciudadanía</option>
+                <option value="NIT">NIT - Número de identificación tributaria</option>
+                <option value="PEP">PEP - Permiso especial de permanencia</option>
+                <option value="PA">PA - Pasaporte</option>
+                <option value="CE">CE - Cédula de extranjería</option>
+                <option value="TE">TE - Tarjeta de extranjería</option>
+            </select>
+            <input type="text" name="nit_cc_demandados[]" placeholder="Número de identificación" required oninput="formatearNumero(this)" style="font-weight: bold;">
+                <button type="button" onclick="eliminarDemandado(this)">✖</button>
+            `;
+            container.appendChild(nuevoCampo);
+        }
+        
+        function eliminarDemandado(btn) {
+            btn.parentElement.remove();
+        }
+        
+        function vistaPrevia() {
+            let form = document.querySelector("form");
+            let formData = new FormData(form);
+            let params = new URLSearchParams(formData).toString();
+            window.open(`/vista_previa?${params}`, '_blank');
+        }
+        
+        // Manejar el envío del formulario con AJAX
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Evitar que el formulario se envíe de manera tradicional
+
+            // Crear un elemento para mostrar el mensaje "Enviando correo..."
+            let mensajeEnviando = document.createElement('div');
+            mensajeEnviando.innerText = 'Enviando correo...';
+            mensajeEnviando.style.position = 'fixed';
+            mensajeEnviando.style.top = '50%';
+            mensajeEnviando.style.left = '50%';
+            mensajeEnviando.style.transform = 'translate(-50%, -50%)';
+            mensajeEnviando.style.backgroundColor = '#2c3e50';
+            mensajeEnviando.style.color = 'white';
+            mensajeEnviando.style.padding = '20px';
+            mensajeEnviando.style.borderRadius = '8px';
+            mensajeEnviando.style.zIndex = '1000';
+            document.body.appendChild(mensajeEnviando);
+
+            let form = this; // Guardar referencia al formulario
+            let formData = new FormData(form);
+
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Eliminar el mensaje "Enviando correo..." después de la respuesta
+                document.body.removeChild(mensajeEnviando);
+
+                if (data.success) {
+                    alert(data.message); // Mostrar el mensaje de éxito
+                    form.reset(); // Borrar los datos del formulario después de hacer clic en "Aceptar"
+                    // Eliminar mandantes y demandados adicionales
+                    let mandantesContainer = document.getElementById("mandantes-container");
+                    let demandadosContainer = document.getElementById("demandados-container");
+                    while (mandantesContainer.children.length > 1) {
+                        mandantesContainer.removeChild(mandantesContainer.lastChild);
+                    }
+                    while (demandadosContainer.children.length > 1) {
+                        demandadosContainer.removeChild(demandadosContainer.lastChild);
+                    }
+                } else {
+                    alert(data.message); // Mostrar el mensaje de error
+                }
+            })
+            .catch(error => {
+                // Eliminar el mensaje "Enviando correo..." en caso de error
+                document.body.removeChild(mensajeEnviando);
+                console.error('Error al enviar el formulario:', error);
+                alert('Ocurrió un error inesperado al procesar el formulario.');
+            });
+        });
+</script>
+</body>
+</html>
