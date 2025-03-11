@@ -362,7 +362,7 @@ def vista_previa_y_firmar():
     email = request.args.get('email', '')
     numero_contrato = request.args.get('numero_contrato', '')
     monto = request.args.get('monto', '0')
-    monto_letras = request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))).upper())
+    monto_letras = request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))))
 
     if pago_final == 'Si':
         texto_pago_final = (
@@ -476,7 +476,7 @@ def vista_previa():
     email = request.args.get('email', '')
     numero_contrato = request.args.get('numero_contrato', '')
     monto = request.args.get('monto', '0')
-    monto_letras = request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))).upper())
+    monto_letras = request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))))
 
     # Generar texto de pago final
     if pago_final == 'Si':
@@ -578,7 +578,7 @@ def formulario():
         numero_contrato = request.form.get('numero_contrato', '')
         monto_str = request.form.get('monto', '0').replace(".", "")
         monto = int(monto_str) if monto_str.isdigit() else 0
-        monto_letras = numero_a_letras(monto).upper()
+        monto_letras = numero_a_letras(monto)
 
         if pago_final == 'Si':
             texto_pago_final = (
@@ -768,7 +768,7 @@ def firma(nombre_archivo):
         dni_demandados = request.form.getlist('tipo_identificacion_demandados[]') or request.args.getlist('tipo_identificacion_demandados[]')
         numero_contrato = request.form.get('numero_contrato', request.args.get('numero_contrato', nombre_archivo))
         monto = request.form.get('monto', request.args.get('monto', '0'))
-        monto_letras = request.form.get('monto_letras', request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))).upper()))
+        monto_letras = request.form.get('monto_letras', request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", "")))))
         pago_final = request.form.get('pago_final', request.args.get('pago_final', 'No'))
         porcentaje = request.form.get('porcentaje', request.args.get('porcentaje', ''))
         email = request.form.get('email', request.args.get('email', ''))
@@ -884,7 +884,7 @@ def firma(nombre_archivo):
     dni_demandados = request.args.getlist('tipo_identificacion_demandados[]')
     numero_contrato = request.args.get('numero_contrato', nombre_archivo)
     monto = request.args.get('monto', '0')
-    monto_letras = request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))).upper())
+    monto_letras = request.args.get('monto_letras', numero_a_letras(int(monto.replace(".", ""))))
     pago_final = request.args.get('pago_final', 'No')
     porcentaje = request.args.get('porcentaje', '')
     email = request.args.get('email', '')
