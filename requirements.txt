@@ -11,3 +11,4 @@ num2words==0.5.12
 python-docx==0.8.10
 python-dotenv==1.0.0
 Werkzeug==2.3.7
+flask_apscheduler==1.13.1
