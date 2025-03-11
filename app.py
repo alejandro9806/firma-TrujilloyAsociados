@@ -28,6 +28,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
+if not app.debug:  # Solo en producción, no en desarrollo local
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
+
 # Configuración de directorios con rutas absolutas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_CONTRATO = os.path.join(BASE_DIR, "Plantillas", "Contrato.docx")
@@ -551,7 +554,7 @@ def vista_previa():
             return f"Error: No se pudo convertir el documento a PDF.", 500
 
         # Generar la URL del PDF para el iframe
-        pdf_url = url_for('ver_contrato', filename=f"contrato_{nombre_base}.pdf", _external=True)
+        pdf_url = url_for('ver_contrato', filename=f"contrato_{nombre_base}.pdf", _external=True, _scheme='https')
 
         # Renderizar la plantilla de vista previa con la URL del PDF
         return render_template('vista_previa.html', pdf_url=pdf_url)
